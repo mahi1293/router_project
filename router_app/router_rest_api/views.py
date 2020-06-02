@@ -17,11 +17,6 @@ from rest_framework.parsers import JSONParser
 
 
 class RouterView(APIView):
-    def get_router_object(self, pk):
-        try:
-            return Router.objects.get(pk=pk)
-        except Router.DoesNotExist:
-            raise Http404
 
     def get(self, request, format=None):
         router_data = Router.objects.all()
@@ -46,32 +41,29 @@ class RouterView(APIView):
                 safe=False
             )
 
-    def put(self, request, format=None):
-        data = request.data
-        router_id = data["id"]
-        router_obj = self.get_router_object(router_id)
-        serializer = RouterSerializers(router_obj, data=request.data)
-        response = {}
+
+class RouterDetail(APIView):
+
+    def get_router_object(self, pk):
+        try:
+            return Router.objects.get(pk=pk)
+        except Router.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = RouterSerializers(snippet)
+        return JsonResponse(serializer.data)
+
+    def put(self, request, pk, format=None):
+        router = self.get_router_object(pk)
+        serializer = RouterSerializers(router, data=request.DATA)
         if serializer.is_valid():
             serializer.save()
-            response["reason"] = serializer.data
-            response["success"] = True
-            return JsonResponse(response, status=status.HTTP_200_OK)
-        else:
-            return JsonResponse(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk):
-        response = {}
-        try:
-            router_obj = self.get_router_object(pk=pk)
-            router_obj.delete()
-            response["success"] = True
-            response["message"] = "Router data is deleted successfully"
-            return JsonResponse(response, status=status.HTTP_204_NO_CONTENT)
-        except Exception:
-            response["success"] = False
-            response["message"] = "Router data is not deleted"
-            return JsonResponse(response, status=status.HTTP_400_BAD_REQUEST)
+    def delete(self, request, pk, format=None):
+        router = self.get_router_object(pk)
+        router.delete()
+        return JsonResponse(status=status.HTTP_204_NO_CONTENT)
