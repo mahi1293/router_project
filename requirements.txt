@@ -7,7 +7,7 @@ django-extensions==2.2.5
 django-mysql==3.3.0
 django-organizations==1.1.2
 django-storages==1.8
-djangorestframework==3.11.0
+djangorestframework==3.11.2
 django-simple-history==2.8.0
 django-redis==4.11.0
 drf-api-tracking==1.6.0
